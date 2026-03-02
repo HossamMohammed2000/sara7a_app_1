@@ -19,8 +19,8 @@ export const decodedToken = async ({
   if (!Bearer || !token || Bearer !== "Bearer")
     throw badRequestException({ message: "Invalid token format" });
 
-  // هنا بنحدد ال signature حسب نوع المستخدم أو حسب التوكن
-  // لو عندك admin tokens يبقى ممكن تمرري signatureLevel كـ arg
+ 
+  
   const signature = getsignature({ signatureLevel: signatureEnum.User });
 
   const decoded = verifyToken({
