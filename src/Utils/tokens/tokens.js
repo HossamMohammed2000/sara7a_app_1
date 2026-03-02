@@ -9,7 +9,7 @@ import {
 } from "../../../config/config.service.js";
 import { RoleEnum, signatureEnum } from "../enums/user.enum.js";
 
-// توليد التوكن (Access أو Refresh حسب الـ secretkey والـ options)
+
 export const generateToken = ({
   payload,
   secretkey = Token_Access_User_Key,
@@ -21,7 +21,7 @@ export const generateToken = ({
   });
 };
 
-// التحقق من التوكن
+
 export const verifyToken = ({
   token,
   tokenSecretKey = Token_Access_User_Key,
@@ -29,7 +29,7 @@ export const verifyToken = ({
   return jwt.verify(token, tokenSecretKey);
 };
 
-// جلب الـ signatures حسب نوع المستخدم (User/Admin)
+
 export const getsignature = ({
   signatureLevel = signatureEnum.User,
 }) => {
