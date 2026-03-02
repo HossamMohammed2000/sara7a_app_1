@@ -43,7 +43,7 @@ export const forbiddenException = (
 };
 
 export const globalErrorHandler = (err, req, res, next) => {
-  // لو err.statusCode مش موجود أو مش رقم صالح
+
   const status = Number(err?.statusCode) || 500;
 
   return res.status(status).json({
