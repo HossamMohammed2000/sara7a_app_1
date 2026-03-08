@@ -10,18 +10,31 @@ import {
 } from "../../Utils/Security/hash.security.js";
 import { HashEnum } from "../../Utils/enums/security.enum.js";
 import { successResponse } from "../../Utils/Response/success.response.js";
-import { generateToken, verifyToken, getsignature, getNewLoginCredentials } from "../../Utils/tokens/tokens.js";
 import {
-  Refresh_EXPIRATION,
-} from "../../../config/config.service.js";
+  generateToken,
+  verifyToken,
+  getsignature,
+  getNewLoginCredentials,
+} from "../../Utils/tokens/tokens.js";
+import { Refresh_EXPIRATION } from "../../../config/config.service.js";
+import Joi from "joi";
+import { signupSchema } from "../Auth/auth.valiadation.js";
 
 export const signup = async (req, res) => {
+  // ✅ صح: validate req.body مباشرة
+  const validationResult = signupSchema.validate(req.body, { abortEarly: false });
+
+  if (validationResult.error) {
+    return badRequestException(
+      validationResult.error.details.map(d => d.message).join(", ")
+    );
+  }
+
   const { firstName, lastName, email, password, phone } = req.body;
 
   const existingUser = await findone(UserModel, "", { email });
 
-  if (existingUser)
-    return badRequestException({ message: "User already exists" });
+  if (existingUser) return badRequestException("User already exists");
 
   const hashedPassword = await generateHash({
     plainText: password,
@@ -36,14 +49,14 @@ export const signup = async (req, res) => {
     phone,
   });
 
-  return successResponse(res, 201, "User created successfully", { user });
+  return successResponse(res, 201, "User created successfully", { data: user });
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await findone(UserModel, "", { email });
-  if (!user) return badRequestException({ message: "User not found" });
+  if (!user) return badRequestException("Invalid email or password");
 
   const isPasswordValid = await compareHash({
     plainText: password,
@@ -51,26 +64,23 @@ export const login = async (req, res) => {
     algo: HashEnum.Argon2,
   });
 
-  if (!isPasswordValid)
-    return badRequestException({ message: "Invalid email or password" });
+  if (!isPasswordValid) return badRequestException("Invalid email or password");
+
   const credentials = await getNewLoginCredentials(user);
- 
 
   return successResponse(res, 200, "User logged in successfully", {
-   data :{credentials}
+    data: { credentials },
   });
 };
 
 export const refreshAccessToken = async (req, res) => {
   try {
     const { authorization } = req.headers;
-    if (!authorization)
-      return badRequestException({ message: "Refresh token required" });
-
+    if (!authorization) return badRequestException("Refresh token required");
 
     const [Bearer, token] = authorization.split(" ") || [];
     if (!Bearer || !token || Bearer !== "Bearer")
-      return badRequestException({ message: "Invalid token format" });
+      return badRequestException("Invalid token format");
 
     const { refreshSignature, accessSignature } = getsignature({
       signatureLevel: signatureEnum.User,
@@ -82,7 +92,7 @@ export const refreshAccessToken = async (req, res) => {
     });
 
     const user = await findById(UserModel, decodedToken.userId);
-    if (!user) throw notFoundException({ message: "User not found" });
+    if (!user) throw notFoundException("User not found");
 
     const accessToken = generateToken({
       payload: { userId: user._id, email: user.email },

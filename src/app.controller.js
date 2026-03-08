@@ -19,7 +19,7 @@ await connectDB();
     );
 
   });
-
+app.use("/uploads",express.static("./uploads"));
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
 

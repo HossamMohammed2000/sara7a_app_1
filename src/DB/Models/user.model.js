@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
       },
     },
     DOB: Date,
+    age: Number,
     phone: { type: String },
     gender: {
       type: Number,
@@ -35,6 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     confirmEmail: Date,
     profilePic: { type: String },
+    isActive: Boolean,
   },
 
   {

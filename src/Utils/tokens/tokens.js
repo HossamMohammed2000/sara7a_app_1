@@ -58,9 +58,9 @@ export const getsignature = ({
   return signature;
 };
 
-// توليد Access + Refresh Token جديدين بعد login
+
 export const getNewLoginCredentials = async (user) => {
-  // نحدد نوع الـ signature بناءً على الـ role
+
   const signatureLevel = user.role === RoleEnum.Admin ? signatureEnum.Admin : signatureEnum.User;
   const signature = getsignature({ signatureLevel });
 
