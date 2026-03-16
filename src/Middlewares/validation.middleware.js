@@ -61,6 +61,17 @@ export const generalFields = {
   role: Joi.string().valid(...Object.values(RoleEnum)),
 
   Provider: Joi.string().valid(...Object.values(ProviderEnum)),
+  file:{
+    filedname: Joi.string(),
+    originalname: Joi.string(),
+    encoding: Joi.string(),
+    mimetype: Joi.string(),
+    size: Joi.number().positive(),
+    destination: Joi.string(),
+    filename: Joi.string(),
+    path: Joi.string(),
+    finalPath: Joi.string(),
+  }
 };
 
 export const validation = (schema) => {

@@ -6,9 +6,9 @@ import authRouter from "./Modules/Auth/auth.controller.js";
 import userRouter from "./Modules/User/user.controller.js";
 import { successResponse } from "./Utils/Response/success.response.js";
 import connectDB from "./DB/connection.js";
-
+import cors from "cors";
 const bootstrap = async (app, express) => {
-  app.use(express.json());
+  app.use(express.json(), cors());
 await connectDB();
   app.get("/", (req, res) => {
     return successResponse(

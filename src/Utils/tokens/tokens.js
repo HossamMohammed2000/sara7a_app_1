@@ -8,19 +8,18 @@ import {
   Token_Refresh_User_Key,
 } from "../../../config/config.service.js";
 import { RoleEnum, signatureEnum } from "../enums/user.enum.js";
-
+import { v4 as uuidv4 } from "uuid";
 
 export const generateToken = ({
   payload,
   secretkey = Token_Access_User_Key,
-  options = {},
+  options = { expiresIn: Access_EXPIRATION },
 }) => {
   return jwt.sign(payload, secretkey, {
     expiresIn: Access_EXPIRATION,
     ...options,
   });
 };
-
 
 export const verifyToken = ({
   token,
@@ -29,10 +28,7 @@ export const verifyToken = ({
   return jwt.verify(token, tokenSecretKey);
 };
 
-
-export const getsignature = ({
-  signatureLevel = signatureEnum.User,
-}) => {
+export const getsignature = ({ signatureLevel = signatureEnum.User }) => {
   let signature = {
     accessSignature: undefined,
     refreshSignature: undefined,
@@ -58,22 +54,23 @@ export const getsignature = ({
   return signature;
 };
 
-
 export const getNewLoginCredentials = async (user) => {
-
-  const signatureLevel = user.role === RoleEnum.Admin ? signatureEnum.Admin : signatureEnum.User;
+  const signatureLevel =
+    user.role === RoleEnum.Admin ? signatureEnum.Admin : signatureEnum.User;
   const signature = getsignature({ signatureLevel });
+
+  const jwtid = uuidv4();
 
   const accessToken = generateToken({
     payload: { userId: user._id },
     secretkey: signature.accessSignature,
-    options: { expiresIn: Access_EXPIRATION },
+    options: { expiresIn: Access_EXPIRATION, jwtid },
   });
 
   const refreshTokenValue = generateToken({
     payload: { userId: user._id },
     secretkey: signature.refreshSignature,
-    options: { expiresIn: Refresh_EXPIRATION },
+    options: { expiresIn: Refresh_EXPIRATION, jwtid },
   });
 
   return {

@@ -3,6 +3,7 @@ import {
   badRequestException,
   forbiddenException,
   notFoundException,
+  unauthorizedException,
 } from "../Utils/Response/error.response.js";
 import { findById } from "../DB/database.repository.js";
 import { getsignature, verifyToken } from "../Utils/tokens/tokens.js";
@@ -31,9 +32,14 @@ export const decodedToken = async ({
         : signature.refreshSignature,
   });
 
+  if(await findById(UserModel, { jti: decoded.jti })) {
+    throw unauthorizedException({ message: "Token has been revoked" });
+  }
   const user = await findById(UserModel, decoded.userId);
   if (!user) throw notFoundException({ message: "User not found" });
-
+if (user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000) {
+    throw unauthorizedException({ message: "Token is no longer valid" });
+  }
   return { user, decoded };
 };
 

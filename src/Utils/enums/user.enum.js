@@ -9,3 +9,8 @@ export const tokenTypeEnum={Access:0,Refresh:1};
 
 
 export const ProviderEnum={System:0,Google:1};
+export const LogoutTypeEnum={
+    logoutFromAll:"logoutFromAll",
+    logout:"logout",
+   
+};

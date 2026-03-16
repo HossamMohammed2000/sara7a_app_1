@@ -23,3 +23,5 @@ export const Token_Refresh_Admin_Key = process.env.Token_Refresh_Admin_Key;
 
 export const Refresh_EXPIRATION = Number(process.env.Refresh_EXPIRATION) ; 
 export const Access_EXPIRATION = Number(process.env.Access_EXPIRATION) ; 
+// SOCIAL LOGINS
+export const CLIENT_ID = process.env.CLIENT_ID;
