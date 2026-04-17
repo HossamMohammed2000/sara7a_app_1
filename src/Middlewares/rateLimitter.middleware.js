@@ -1,49 +1,58 @@
-// ipRequest
-const ipRequest = {};
-// set
-const blockedIps = new Set();
-
-
-// map
-const unBlockedTimers = new Map();
+import { get, set } from "../DB/redis.service.js";
 
 const RATE_LIMIT = 5;
- const WINDOW_MS = 60 * 1000; 
+const WINDOW_MS = 60; 
 
- export const customRateLimiter = (req, res, next) => {
- const Ip = req.ip;
-  const currentTime = Date.now();
-  if(blockedIps.has(ip)){
-    return res.status(403).json({ message: "Blocked Ip . Try again later." });
-  }
-  if(!ipRequest[ip]){
-    ipRequest[ip] = {
-        count: 1,
-        startTime: currentTime
-    };
-    return next();
-  }
-  const diff = currentTime - ipRequest[ip].startTime;
-  if(diff < WINDOW_MS){
-    ipRequest[ip].count ++
-    if(ipRequest[ip].count > RATE_LIMIT){
-        blockedIps.add(ip);
-      if(!unBlockedTimers.has(ip)){
-        const timer = setTimeout(() => {
-            blockedIps.delete(ip);
-            unBlockedTimers.delete(ip);
-        }, WINDOW_MS);    
-        unBlockedTimers.set(ip, timer);
-      }
-      return res.status(429).json({ message: "Too many requests . you have been blocked." });
+/* ================= RATE LIMITER ================= */
+export const customRateLimiter = async (req, res, next) => {
+  try {
+    const ip = req.ip;
+
+   
+    const isBlocked = await get(`blocked:${ip}`);
+    if (isBlocked) {
+      return res.status(403).json({
+        message: "Blocked Ip. Try again later.",
+      });
     }
 
-  }
-    else{
-        ipRequest[ip] = {
-            count: 1,
-            startTime: currentTime
-        };
+   
+    let requestData = await get(`rate_limit:${ip}`);
+
+    if (!requestData) {
+     
+      await set(
+        `rate_limit:${ip}`,
+        { count: 1 },
+        WINDOW_MS
+      );
+      return next();
     }
+
+    requestData = JSON.parse(requestData);
+
+    requestData.count++;
+
+   
+    if (requestData.count > RATE_LIMIT) {
+      // block ip
+      await set(`blocked:${ip}`, true, WINDOW_MS);
+
+      return res.status(429).json({
+        message: "Too many requests. You have been blocked.",
+      });
+    }
+
+   
+    await set(
+      `rate_limit:${ip}`,
+      requestData,
+      WINDOW_MS
+    );
+
     return next();
-}
+  } catch (error) {
+    console.log("RateLimiter Error:", error);
+    return next();
+  }
+};

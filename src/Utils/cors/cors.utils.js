@@ -1,4 +1,3 @@
-// import {  White_List } from "../../../config/config.service.js";
 import { WHITE_LIST} from "../../../config/config.service.js";
 import { badRequestException } from "../Response/error.response.js";
 

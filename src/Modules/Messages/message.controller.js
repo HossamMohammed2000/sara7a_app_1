@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as messageService from "./message.service.js";
 import * as messageValidation from "./message.validation.js";
 import { successResponse } from "../../Utils/Response/success.response.js";
-// import { authantication } from "../../Middlewares/auth.middleware.js";
+
 import { validation } from "../../Middlewares/validation.middleware.js";
 import {
   authantication,

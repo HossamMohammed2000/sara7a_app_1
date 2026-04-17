@@ -32,9 +32,7 @@ export const decodedToken = async ({
         : signature.refreshSignature,
   });
 
-  // if(await findById(UserModel, { jti: decoded.jti })) {
-  //   throw unauthorizedException({ message: "Token has been revoked" });
-  // }
+
   const isRevoked = await get(revokeTokenKey({User_Id:decoded.userId , jti:decoded.jti}));
   if (isRevoked) {
     throw unauthorizedException({ message: "Token has been revoked" });

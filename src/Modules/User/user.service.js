@@ -55,7 +55,7 @@ export const updatePassword = async (req, res) => {
     hash: user.password,
     algo: HashEnum.Argon2,
   });
-  // if (!user) throw badRequestException("User not found");
+
   if (!isValidPassword) throw badRequestException("Invalid  password");
 const hashedPassword = await generateHash({
   plainText: newPassword,

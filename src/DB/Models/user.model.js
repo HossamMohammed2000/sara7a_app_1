@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      lowercase: true, // 🔥 مهم عشان مشكلة login
+      lowercase: true, 
       trim: true,
     },
 
