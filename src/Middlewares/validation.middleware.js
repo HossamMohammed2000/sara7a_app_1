@@ -1,51 +1,57 @@
 import { Types } from "mongoose";
-import { badRequestException } from "../Utils/Response/error.response.js";
+import joi from "joi";
+
 import {
   GenderEnum,
   ProviderEnum,
   RoleEnum,
 } from "../Utils/enums/user.enum.js";
-import Joi from "joi";
 
 export const generalFields = {
-  firstName: Joi.string().alphanum().min(3).max(25).messages({
-    "string.required": "First name is required",
+  firstName: joi.string().alphanum().min(3).max(25).required().messages({
+    "string.empty": "First name is required",
     "string.min": "First name must be at least 3 characters long",
     "string.max": "First name must be at most 25 characters long",
   }),
 
-  lastName: Joi.string().alphanum().min(3).max(25).messages({
-    "string.required": "Last name is required",
+  lastName: joi.string().alphanum().min(3).max(25).required().messages({
+    "string.empty": "Last name is required",
   }),
 
-  email: Joi.string()
+  email: joi
+    .string()
     .email({
       minDomainSegments: 1,
       maxDomainSegments: 3,
       tlds: { allow: ["com", "net", "org"] },
     })
+    .required()
     .messages({
       "string.email": "Please provide a valid email address",
+      "string.empty": "Email is required",
     }),
 
-  age: Joi.number().positive().integer(),
+  age: joi.number().positive().integer(),
 
-  password: Joi.string().messages({
-    "string.required": "Password is required",
+  password: joi.string().required().messages({
+    "string.empty": "Password is required",
   }),
 
-  confirmPassword: Joi.string().valid(Joi.ref("password")).messages({
+  confirmPassword: joi.string().valid(joi.ref("password")).required().messages({
     "any.only": "Passwords do not match",
+    "string.empty": "Confirm password is required",
   }),
 
-  phone: Joi.string()
+  phone: joi
+    .string()
     .pattern(/^01[0125][0-9]{8}$/)
     .messages({
       "string.pattern.base":
         "Phone number must be a valid Egyptian mobile number",
     }),
 
-  id: Joi.string()
+  id: joi
+    .string()
     .custom((value, helpers) => {
       if (!Types.ObjectId.isValid(value)) {
         return helpers.error("any.invalid");
@@ -56,22 +62,33 @@ export const generalFields = {
       "any.invalid": "Invalid ID format",
     }),
 
-  gender: Joi.string().valid(...Object.values(GenderEnum)),
+  gender: joi.string().valid(...Object.values(GenderEnum)),
 
-  role: Joi.string().valid(...Object.values(RoleEnum)),
+  role: joi.string().valid(...Object.values(RoleEnum)),
 
-  Provider: Joi.string().valid(...Object.values(ProviderEnum)),
-  file:{
-    filedname: Joi.string(),
-    originalname: Joi.string(),
-    encoding: Joi.string(),
-    mimetype: Joi.string(),
-    size: Joi.number().positive(),
-    destination: Joi.string(),
-    filename: Joi.string(),
-    path: Joi.string(),
-    finalPath: Joi.string(),
-  }
+  provider: joi.string().valid(...Object.values(ProviderEnum)),
+
+  
+  file: {
+    fieldname: joi.string(),
+    originalname: joi.string(),
+    encoding: joi.string(),
+    mimetype: joi.string(),
+    size: joi.number().positive(),
+    destination: joi.string(),
+    filename: joi.string(),
+    path: joi.string(),
+    finalPath: joi.string(),
+  },
+
+  otp: joi
+    .string()
+    .pattern(/^[0-9]{6}$/)
+    .length(6)
+    .messages({
+      "string.length": "OTP must be exactly 6 digits",
+      "string.pattern.base": "OTP must contain only digits",
+    }),
 };
 
 export const validation = (schema) => {
@@ -92,9 +109,12 @@ export const validation = (schema) => {
     }
 
     if (validationError.length) {
-      return res.status(400).json(validationError);
+      return res.status(400).json({
+        message: "Validation Error",
+        errors: validationError,
+      });
     }
 
-    next();
+     return next();
   };
 };

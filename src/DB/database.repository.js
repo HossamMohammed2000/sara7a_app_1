@@ -1,4 +1,4 @@
-export const findone = async (
+export const findOne = async (
   model,
   select = "",
   filter = {},
@@ -68,12 +68,18 @@ export const updateOne = async (model, filter = {}, update, options) => {
 
 export const findOneAndUpdate = async (model, filter = {}, update, options) => {
   return await model.findOneAndUpdate(
-    filter,
-    { ...update, $inc: { __v: 1 } },
+    filter || {},
+    {
+      ...update,
+      $inc: {
+        ...(update?.$inc || {}),
+        __v: 1,
+      },
+    },
     {
       new: true,
       runValidators: true,
-      ...options,
+      ...(options || {}),
     },
   );
 };

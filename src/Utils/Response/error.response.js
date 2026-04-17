@@ -1,28 +1,36 @@
 export const errorResponse = (
   message = "Error",
   statusCode = 400,
-  extra = undefined
+  extra = undefined,
 ) => {
- 
   const error = new Error(
-  typeof message === "string"
-    ? message
-    : message?.message?.toString() || "Error"
-);
+    typeof message === "string"
+      ? message
+      : message?.message?.toString() || "Error",
+  );
   error.statusCode = statusCode;
-  if (extra !== undefined) error.extra = extra; 
+  if (extra !== undefined) error.extra = extra;
   throw error;
 };
 
-export const badRequestException = (message = "bad request", extra = undefined) => {
+export const badRequestException = (
+  message = "bad request",
+  extra = undefined,
+) => {
   return errorResponse(message, 400, extra);
 };
 
-export const conflictException = (message = "conflict exception", extra = undefined) => {
+export const conflictException = (
+  message = "conflict exception",
+  extra = undefined,
+) => {
   return errorResponse(message, 409, extra);
 };
 
-export const unauthorizedException = (message = "unauthorized", extra = undefined) => {
+export const unauthorizedException = (
+  message = "unauthorized",
+  extra = undefined,
+) => {
   return errorResponse(message, 401, extra);
 };
 
@@ -30,19 +38,18 @@ export const notFoundException = (message = "not found", extra = undefined) => {
   return errorResponse(message, 404, extra);
 };
 
-export const forbiddenException = (message = "forbidden", extra = undefined) => {
+export const forbiddenException = (
+  message = "forbidden",
+  extra = undefined,
+) => {
   return errorResponse(message, 403, extra);
 };
 
-
 export const globalErrorHandler = (err, req, res, next) => {
   const status = Number(err?.statusCode) || 500;
-  const extra = err?.extra;
 
   return res.status(status).json({
     message: err?.message || "Internal Server Error",
-    stack: err?.stack,
     statusCode: status,
-    ...(extra ? { extra } : {}), 
   });
 };

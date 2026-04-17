@@ -1,10 +1,10 @@
-import Joi from "joi";
+import joi from "joi";
 import { fileValidation } from "../../Utils/multer/local.multer.js";
 import { generalFields } from "../../Middlewares/validation.middleware.js";
 
 export const updateProfilePictureSchema = {
-  file: Joi.object({
-    fieldname: generalFields.file.filedname.valid("attachments").required(),
+  file: joi.object({
+    fieldname: generalFields.file.fieldname.valid("attachments").required(),
     originalname: generalFields.file.originalname.required(),
     mimetype: generalFields.file.mimetype.valid(...fileValidation.images).required(),
     size: generalFields.file.size.max(5 * 1024 * 1024).required(),
@@ -21,13 +21,13 @@ export const updateProfilePictureSchema = {
 };
 
 export const coverImagesValidationSchema = {
-  file: Joi.array()
+  file: joi.array()
     .items(
-      Joi.object({
-        fieldname: generalFields.file.filedname.valid("attachments").required(),
+      joi.object({
+        fieldname: generalFields.file.fieldname.valid("attachments").required(),
         originalname: generalFields.file.originalname.required(),
-        mimetype: Joi.string().valid(...fileValidation.images).required(),
-        size: Joi.number().positive().required(),
+        mimetype: joi.string().valid(...fileValidation.images).required(),
+        size: joi.number().positive().required(),
       })
     )
     .min(1)
@@ -36,4 +36,34 @@ export const coverImagesValidationSchema = {
     .messages({
       "object.base": "File is required",
     }),
+};
+
+
+export const updatePasswordSchema = {
+  body: joi.object({
+    oldPassword: joi.string().required(),
+    newPassword: joi.string().min(8).required(),
+    confirmPassword: joi.string().valid(joi.ref("newPassword")).required(),
+  }),
+}
+
+
+
+export const freezeAccountSchema = {
+  params: joi.object({
+    userId: generalFields.id,
+  }),
+};
+
+
+export const restoreAccountSchema = {
+  params: joi.object({
+    userId: generalFields.id,
+  }),
+};
+
+export const hardDeleteUserSchema = {
+  params: joi.object({
+    userId: generalFields.id,
+  }),
 };
